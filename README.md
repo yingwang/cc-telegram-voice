@@ -1,18 +1,33 @@
 # cc-telegram-voice
 
-Offline voice-to-text for [Claude Code](https://claude.com/claude-code) channels.
-When someone sends a voice note over the Telegram plugin, Claude Code can only
-see an audio attachment, not its contents. This little repo transcribes that
-audio **entirely on your own machine** so Claude can read what was said and
-reply, with no audio ever leaving the computer.
+*中文说明见 [README.zh.md](README.zh.md).*
 
-It is two well-worn open-source pieces wired together:
+Two-way voice for [Claude Code](https://claude.com/claude-code) channels. When
+someone sends a voice note over the Telegram plugin, Claude Code sees only an
+audio attachment, not its contents; and on its own Claude can only reply in
+text. This little repo closes both gaps, but the two directions differ in one
+important way:
+
+- **Speech in** (`transcribe.py`) turns an incoming voice note into text
+  **entirely on your own machine**. No audio ever leaves the computer.
+- **Speech out** (`speak.py`) turns Claude's text reply back into a voice note.
+  This half is **not** offline: it uses Microsoft's online neural voices, so the
+  reply text is sent to Microsoft to be synthesized.
+
+So the transcription side is fully local, while the synthesis side trades that
+privacy for free, natural-sounding voices. Reach for voice-out only with text
+you are comfortable sending out; keep anything sensitive in text.
+
+The pieces are all well-worn open source, wired together:
 
 - **[PyAV](https://github.com/PyAV-Org/PyAV)** decodes the incoming audio.
   PyAV bundles the FFmpeg libraries, so you do not need a system ffmpeg. This
   matters for Telegram voice notes, which are ogg/opus.
 - **[whisper.cpp](https://github.com/ggerganov/whisper.cpp)** does the speech
   recognition, running a local Whisper model with no network calls.
+- **[edge-tts](https://github.com/rany2/edge-tts)** does the speech synthesis
+  through Microsoft Edge's online neural voices, which are free and need no API
+  key. This is the one part that talks to the network.
 
 ## Install
 
@@ -83,12 +98,26 @@ The bundled `voice-reply` skill wires this into a channel reply.
 sends the text to Microsoft's endpoint to synthesize it. Keep anything you must
 not share in text, not voice.
 
-## Why offline
+## What runs locally, what does not
 
-The transcription side runs locally. No API keys, no upload, no per-minute cost, and voice
-audio never leaves your machine. The tradeoff is that recognition quality is
+Transcription is fully local: no API keys, no upload, no per-minute cost, and the
+voice audio never leaves your machine. The tradeoff is that recognition quality is
 whatever the local model gives you; bump to a larger ggml model with `--model`
 if you need more accuracy.
+
+Synthesis is the opposite. edge-tts sends your reply text to Microsoft to render
+it, in exchange for free, natural voices and no setup. So the repo as a whole is
+not fully offline once you use voice-out. Keep anything you must not share in
+text rather than voice, or skip voice-out entirely and stay fully local.
+
+## Languages
+
+Both directions are multilingual. On the way in, `--lang` takes any Whisper
+language code (`zh`, `en`, ...) or `auto` to detect, and mixed Chinese/English
+speech is understood. On the way out, pick a voice that matches the language you
+are speaking: `zh-CN-YunxiNeural` for Chinese, an `en-US-*` voice for English,
+and so on (`speak.py --list-voices`). A Chinese voice reading a full English
+sentence will sound off, so switch voices rather than languages.
 
 ## A note on WeChat voice
 
