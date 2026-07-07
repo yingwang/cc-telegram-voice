@@ -41,17 +41,26 @@ larger one for accuracy or a tiny one for speed.
 
 ## Use inside Claude Code
 
-Copy the bundled skill into your Claude Code skills directory:
+Copy the bundled skills into your Claude Code skills directory:
 
 ```bash
-cp -r skills/voice-transcribe ~/.claude/skills/
+cp -r skills/voice-transcribe skills/voice-reply ~/.claude/skills/
 ```
 
-Then edit `~/.claude/skills/voice-transcribe/SKILL.md` and replace
-`/ABSOLUTE/PATH/TO/cc-telegram-voice` with the real path where you cloned this
-repo. After that, when a Telegram voice note arrives, Claude Code will download
-the attachment, run the transcriber, and treat the result as if you had typed
-it.
+Then edit both `SKILL.md` files and replace `/ABSOLUTE/PATH/TO/cc-telegram-voice`
+with the real path where you cloned this repo. After that Claude Code picks the
+skills up on its own:
+
+- **voice-transcribe** (speech in): when a Telegram voice note arrives, Claude
+  downloads the attachment, runs `transcribe.py`, and treats the transcript as
+  if you had typed it.
+- **voice-reply** (speech out): when you ask for a spoken answer, Claude runs
+  `speak.py` on its reply and sends the resulting mp3 back through the channel's
+  reply tool as a voice attachment.
+
+There is nothing to run by hand; Claude invokes the scripts when the skill
+applies. Voice-out only fires when you explicitly ask for it, so ordinary
+replies stay text.
 
 ## Replying with voice (TTS)
 
