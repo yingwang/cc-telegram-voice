@@ -53,9 +53,30 @@ repo. After that, when a Telegram voice note arrives, Claude Code will download
 the attachment, run the transcriber, and treat the result as if you had typed
 it.
 
+## Replying with voice (TTS)
+
+The flip side of `transcribe.py`: turn Claude's text reply back into a voice
+note, so a channel can be two-way voice. `speak.py` does this with
+[edge-tts](https://github.com/rany2/edge-tts), Microsoft Edge's neural voices,
+which are free and need no API key.
+
+```bash
+python speak.py "你好，很高兴见到你" --voice zh-CN-YunxiNeural --out reply.mp3
+python speak.py --list-voices | grep en-US        # pick any voice or language
+```
+
+Tune pace and tone with `--rate` and `--pitch`, e.g. `--rate=-11% --pitch=-2Hz`.
+A flatter, calmer cadence comes mostly from writing the text with few internal
+commas, so the pauses fall on full stops, rather than from those flags alone.
+The bundled `voice-reply` skill wires this into a channel reply.
+
+**Privacy tradeoff:** unlike `transcribe.py`, which is fully local, edge-tts
+sends the text to Microsoft's endpoint to synthesize it. Keep anything you must
+not share in text, not voice.
+
 ## Why offline
 
-Everything runs locally. No API keys, no upload, no per-minute cost, and voice
+The transcription side runs locally. No API keys, no upload, no per-minute cost, and voice
 audio never leaves your machine. The tradeoff is that recognition quality is
 whatever the local model gives you; bump to a larger ggml model with `--model`
 if you need more accuracy.
