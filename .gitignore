@@ -1,0 +1,11 @@
+# Built / downloaded artifacts — recreated by setup.sh, never committed
+.venv/
+whisper.cpp/
+models/
+
+# Python
+__pycache__/
+*.pyc
+
+# OS
+.DS_Store
